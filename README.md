@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/github/license/VoidmatrixHeathcliff/NiceGUI.svg?style=flat&label=license&message=notspecified&labelColor=3f48cc)](https://github.com/VoidmatrixHeathcliff/NiceGUI/blob/main/LICENSE)
 [![Commit activity](https://img.shields.io/github/contributors/VoidmatrixHeathcliff/NiceGUI)](https://github.com/VoidmatrixHeathcliff/NiceGUI/graphs/contributors)
 
-基于 EtherEngine 的轻量级 GUI 库
+基于 [EtherEngine](https://github.com/VoidmatrixHeathcliff/EtherEngine) 的轻量级 GUI 库
 
 目前支持组件：
 
