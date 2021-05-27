@@ -1,4 +1,6 @@
-local _TextView = require("NiceGUI.TextView")
+local _TextView = UsingModule("NiceGUI._TextView")
+local _Button = UsingModule("NiceGUI._Button")
+local _PopTip = UsingModule("NiceGUI._PopTip")
 
 local _tbElements = {}
 
@@ -6,14 +8,15 @@ return {
 
     UpdateEvent = function(event)
         for _, ele in pairs(_tbElements) do
-            if ele then ele:HandleEvent(event) end
+            if ele then ele:_HandleEvent(event) end
         end
     end,
 
     UpdateRender = function()
         for _, ele in pairs(_tbElements) do
-            if ele then ele:DrawSelf() end
+            if ele then ele:_DrawSelf() end
         end
+        _PopTip._DrawSelf()
     end,
 
     Place = function(obj)
@@ -31,8 +34,20 @@ return {
         _tbElements = {}
     end,
 
-    TextView = function(rect)
-        return _TextView.New(rect)
+    TextView = function(values)
+        return _TextView._New(values)
+    end,
+
+    Button = function(values)
+        return _Button._New(values)
+    end,
+
+    ShowPopTip = function(values)
+        _PopTip._Show(values)
+    end,
+
+    HidePopTip = function()
+        _PopTip._Hide()
     end,
 
 }
