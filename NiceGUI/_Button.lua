@@ -4,9 +4,15 @@ Button：按钮
 
 Meta:
     + _New
-        - rect
-        - font
-        - onClick
+        - rect / table
+        - text / string
+        - font / userdata-Graphic.Font
+        - onClick / function
+        - onEnter / function
+        - onLeave / function
+        - enable / boolean
+        - colorText / table
+        - colorBack / table
     + _HandleEvent
     + _DrawSelf
 API:
@@ -29,15 +35,17 @@ return {
 
     _New = function(values)
         
-        assert(values)
+        assert(type(values) == "table")
 
         obj = {}
 
         obj._uFont = values.font or _Graphic.LoadFontFromFile("./res/font/SIMYOU.TTF", 18)
-        obj._strText = values.text or "按 钮"
+        obj._strText = values.text or "Button"
+        obj._clrText = values.colorText or {r = 25, g = 25, b = 25, a = 255}
+        obj._clrBack = values.colorBack or {r = 185, g = 185, b = 185, a = 255}
         local _image = _Graphic.CreateUTF8TextImageBlended(
             obj._uFont, obj._strText,
-            {r = 25, g = 25, b = 25, a = 255}
+            obj._clrText
         )
         obj._uTextureText = _Graphic.CreateTexture(_image)
         obj._nTextWidth, obj._nTextHeight = _image:GetSize()
@@ -45,7 +53,11 @@ return {
         obj._fnEnterCallback = values.onEnter or function() end
         obj._fnLeaveCallback = values.onLeave or function() end
         obj._bSelfHover, obj._bSelfDown = false, false
-        obj._bSelfEnable = true
+        if values.enable == nil then
+            obj._bSelfEnable = true
+        else
+            obj._bSelfEnable = values.enable
+        end
         obj._nMarginHorizontal, obj._nMarginVertical = 15, 8
         obj._rcSelf = {
             x = 0, y = 0,
@@ -96,7 +108,7 @@ return {
             elseif self._bSelfHover then
                 _Graphic.SetDrawColor({r = 205, g = 205, b = 205, a = 255})
             else
-                _Graphic.SetDrawColor({r = 185, g = 185, b = 185, a = 255})
+                _Graphic.SetDrawColor(self._clrBack)
             end
             _Graphic.FillRectangle(self._rcSelf)
             -- 绘制立体边框线
@@ -121,7 +133,7 @@ return {
             self._strText = text
             local _image = _Graphic.CreateUTF8TextImageBlended(
                 self._uFont, self._strText,
-                {r = 25, g = 25, b = 25, a = 255}
+                self._clrText
             )
             self._uTextureText = _Graphic.CreateTexture(_image)
             self._nTextWidth, self._nTextHeight = _image:GetSize()

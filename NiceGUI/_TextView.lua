@@ -3,6 +3,14 @@
 TextView：文本列表
 
 Meta:
+    + _New
+        - rect / table
+        - font / userdata-Graphic.Font 
+        - onEnter / function
+        - onLeave / function
+        - enableSlider / boolean
+        - colorText / table
+        - colorBack / table
     + _HandleEvent
     + _DrawSelf
 API:
@@ -32,8 +40,13 @@ local function _GetRCSlider(self)
         h = self._rcViewPort.h / math.max(self._nTextHeight * #self._tbText, self._rcViewPort.h)
             * self._rcScrollBar.h
     }
-    -- 当文本列表中无文本时修正滑块y坐标
-    if #self._tbText == 0 then _rect.y = self._rcScrollBar.y end
+    -- 当滑块被禁用时修正y坐标和高度
+    if not self._bSliderEnable then
+        _rect.y, _rect.h = self._rcScrollBar.y, self._rcScrollBar.h
+    else
+        -- 当文本列表中无文本时修正滑块y坐标
+        if #self._tbText == 0 then _rect.y = self._rcScrollBar.y end
+    end
     return _rect
 end
 
@@ -73,20 +86,26 @@ return {
     
     _New = function(values)
 
-        assert(values)
+        assert(type(values) == "table")
 
         obj = {}
 
         obj._uFont = values.font or _Graphic.LoadFontFromFile("./res/font/SIMYOU.TTF", 16)
         obj._fnEnterCallback = values.onEnter or function() end
         obj._fnLeaveCallback = values.onLeave or function() end
+        obj._clrText = values.colorText or {r = 200, g = 200, b = 200, a = 255}
+        obj._clrBack = values.colorBack or {r = 25, g = 25, b = 25, a = 255}
         obj._nTextHeight = obj._uFont:GetHeight()
         obj._tbText, obj._tbRawText = {}, {}
         obj._nMargin, obj._nBorder = 10, 5
         obj._nWidthScrollBar = 15
         obj._nPreviousY = 0
         obj._bSliderDown, obj._bSliderHover = false, false
-        obj._bSliderEnable = true
+        if values.enableSlider == nil then
+            obj._bSliderEnable = true
+        else
+            obj._bSliderEnable = values.enableSlider
+        end
         obj._bSelfHover = false
         obj._rcSelf = {
             x = 0, y = 0,
@@ -167,29 +186,29 @@ return {
 
         function obj:_DrawSelf()
             -- 绘制文本区域底色
-            _Graphic.SetDrawColor({r = 25, g = 25, b = 25, a = 255})
+            _Graphic.SetDrawColor(self._clrBack)
             _Graphic.FillRectangle(self._rcContent)
             -- 绘制文本区域立体边框线
             _Utils.DrawRectSolidBorder(self._rcContent, 2)
             -- 绘制侧边滚动条底色
-            _Graphic.SetDrawColor({r = 25, g = 25, b = 25, a = 255})
+            _Graphic.SetDrawColor(self._clrBack)
             _Graphic.FillRectangle(self._rcScrollBar)
             -- 绘制侧边滚动条滑块部分
-            if self._bSliderDown then
-                _Graphic.SetDrawColor({r = 165, g = 165, b = 165, a = 255})
-            elseif self._bSliderHover then
-                _Graphic.SetDrawColor({r = 205, g = 205, b = 205, a = 255})
+            if not self._bSliderEnable then 
+                _Graphic.SetDrawColor({r = 135, g = 135, b = 135, a = 255})
             else
-                _Graphic.SetDrawColor({r = 185, g = 185, b = 185, a = 255})
+                if self._bSliderDown then
+                    _Graphic.SetDrawColor({r = 165, g = 165, b = 165, a = 255})
+                elseif self._bSliderHover then
+                    _Graphic.SetDrawColor({r = 205, g = 205, b = 205, a = 255})
+                else
+                    _Graphic.SetDrawColor({r = 185, g = 185, b = 185, a = 255})
+                end
             end
+            
             _Graphic.FillRectangle(_GetRCSlider(self))
             -- 绘制侧边滚动条边框线
             _Utils.DrawRectSolidBorder(self._rcScrollBar, 2)
-            -- 如果滑块状态为禁用则绘制蒙版
-            if not self._bSliderEnable then 
-                _Graphic.SetDrawColor({r = 185, g = 185, b = 185, a = 120})
-                _Graphic.FillRectangle(self._rcScrollBar)
-            end
             -- 绘制文本内容
             local _rcCopyDst = {
                 x = self._rcContent.x + self._nMargin,
@@ -209,7 +228,7 @@ return {
                 if not self._tbRenderedText[index] then
                     local _image = _Graphic.CreateUTF8TextImageBlended(
                         self._uFont, self._tbText[index],
-                        {r = 200, g = 200, b = 200, a = 255}
+                        self._clrText
                     )
                     local _width, _height = _image:GetSize()
                     self._tbRenderedText[index] = {
