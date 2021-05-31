@@ -14,3 +14,4 @@
 | TextView | 文本列表 |
 | Button | 按钮 |
 | PopTip | 弹出式提示框 |
+| Label | 文本标签 |
